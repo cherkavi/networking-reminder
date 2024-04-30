@@ -1,4 +1,5 @@
 # application for managing your network ( people around you )
+[Main Idea and inspiration](https://www.youtube.com/watch?v=yezuJEaEOpg&t=368s)
 
 ## Installation 
 
