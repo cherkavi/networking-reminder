@@ -1,20 +1,15 @@
-# pip3 install setproctitle
-# pip3 install prompt-toolkit
-# pip3 install PyInquirer
-
 import csv
 import re
 import sys
 from datetime import datetime
 from typing import List, Union
 
-from pydantic import ValidationError
-# from prompt_toolkit.validation import Validator, ValidationError
-from questionary import prompt, Separator
+from questionary import ValidationError
+from questionary import Validator
+from questionary import prompt, Separator, unsafe_prompt
 from rich import print as print_rich
 from rich.console import Console
 from rich.table import Table
-from validate import Validator
 
 from _common import create_table, create_connection, Connection, NetworkElement, Contact, DB_DEFAULT_PATH, get_contacts_by_name_and_surname
 
@@ -172,13 +167,13 @@ class DateValidator(Validator):
         try:
             datetime.strptime(document.text, '%Y-%m-%d')
         except ValueError:
-            raise ValidationError(
-                message='Please enter a date in YYYY-MM-DD format',
-                cursor_position=len(document.text))
+            raise ValidationError( message='Please enter a date in YYYY-MM-DD format', cursor_position=len(document.text) )
 
 
 class EmailValidator(Validator):
     def validate(self, document):
+        if not document.text or len(document.text)==0:
+            return
         if not re.match(r"[^@]+@[^@]+\.[^@]+", document.text):
             raise ValidationError(
                 message='Please enter a valid email address',
@@ -251,8 +246,12 @@ def prompt_network_element(element: NetworkElement = None):
         # Add more questions for the remaining fields
     ]
 
-    contact_answers = prompt(contact_questions)
-    connection_answers = prompt(connection_questions)
+    try:
+        contact_answers = unsafe_prompt(contact_questions)
+        connection_answers = unsafe_prompt(connection_questions)
+    except KeyboardInterrupt:
+        return None
+
 
     contact = Contact(0, contact_answers['name'], contact_answers['surname'], contact_answers['birthdate'],
                       contact_answers['note'])
@@ -261,16 +260,6 @@ def prompt_network_element(element: NetworkElement = None):
                             '')
 
     return NetworkElement(contact, connection)
-
-
-main_menu: List[str] = [
-    'Find record',
-    'Create record',
-    'Edit record',
-    'Import Google contacts',
-    'Delete record',
-    'Exit'
-]
 
 
 def confirm_delete(element: NetworkElement):
@@ -349,6 +338,14 @@ def parse_google_contacts(file_path: str) -> List[GoogleContact]:
             contacts.append(contact)
     return contacts
 
+main_menu: List[str] = [
+    'Find record',
+    'Create record',
+    'Edit record',
+    'Import Google contacts',
+    'Delete record',
+    'Exit'
+]
 
 def menu():
     questions = [
@@ -360,8 +357,10 @@ def menu():
         }
     ]
 
-    answers = prompt(questions)
-    return answers['action']
+    try:
+        return unsafe_prompt(questions)['action']
+    except KeyboardInterrupt:
+        return "Exit"
 
 
 def print_contacts(contacts):
@@ -447,8 +446,14 @@ if __name__ == '__main__':
 
             if mode == 'Edit record':
                 print("-------------")
-                id = input("Enter the ID of the record you want to edit: ")
-                element = get_network_element(connection, id)
+                try:
+                    id = input("Enter the ID of the record you want to edit: ")
+                except KeyboardInterrupt:
+                    continue
+                element:NetworkElement = get_network_element(connection, id)
+                if not element:
+                    print(f"no element found with id: {id}")
+                    continue
                 print(element)
                 element = prompt_network_element(element)
                 element.contact.id = id
@@ -457,7 +462,10 @@ if __name__ == '__main__':
 
             if mode == 'Delete record':
                 print("-------------")
-                id = input("Enter the ID of the record you want to delete: ")
+                try:
+                    id = input("Enter the ID of the record you want to delete: ")
+                except KeyboardInterrupt:
+                    continue
                 element: NetworkElement = get_network_element(connection, id)
                 if not element:
                     print_rich(f"[bold yellow]Warning: [/bold yellow] element ({id}) was not found.")
@@ -468,8 +476,11 @@ if __name__ == '__main__':
 
             if mode == 'Find record':
                 print("-------------")
-                name = input("Enter the name of the contact you want to find: ")
-                surname = input("Enter the surname of the contact you want to find: ")
+                try:
+                    name = input("Enter the name of the contact you want to find: ")
+                    surname = input("Enter the surname of the contact you want to find: ")
+                except KeyboardInterrupt:
+                    continue
                 contacts = get_contacts_by_name_and_surname(connection, name, surname)
                 if not contacts:
                     print_rich(f"[bold yellow]Warning: [/bold yellow] element ({name} {surname}) was not found.")
@@ -479,7 +490,10 @@ if __name__ == '__main__':
 
             if mode == 'Import Google contacts':
                 print("-------------")
-                path_to_file = input("Enter full path to csv file with Google contacts: ")
+                try:
+                    path_to_file = input("Enter full path to csv file with Google contacts: ")
+                except KeyboardInterrupt:
+                    continue
                 contacts: List[GoogleContact] = parse_google_contacts(path_to_file)
                 for contact in contacts:
                     element = NetworkElement(Contact(0, contact.name, contact.surname, contact.birthdate, contact.note),

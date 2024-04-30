@@ -1,17 +1,9 @@
-"""
-* find the next meeting
-* change meeting status
-* add notes for the meeting
-* arrange new meeting
-"""
 import sys
 import threading
 from datetime import datetime, timedelta
 from sqlite3 import Connection
 from typing import List, Union, Tuple
 
-from pynput import keyboard
-from pynput.keyboard import Controller, Key
 from questionary import prompt, Separator, unsafe_prompt, Style, press_any_key_to_continue
 from rich.console import Console
 from rich.table import Table
