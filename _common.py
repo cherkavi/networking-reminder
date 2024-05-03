@@ -109,7 +109,7 @@ class Meeting:
         self.notes = notes
 
     def __str__(self):
-        return f"Meeting {self.id_contact} on {self.date} status: {self.status} notes: {self.notes}"
+        return f"Meeting {self.id}: {self.id_contact} on {self.date} status: {self.status} notes: {self.notes}"
 
     @staticmethod
     def get_by_id(meetings: List, meeting_id: int):

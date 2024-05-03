@@ -392,16 +392,16 @@ def print_network_element(network_elements: List[NetworkElement]) -> None:
     table.add_column("Surname")
     table.add_column("Birthdate")
     table.add_column("Note")
-    table.add_column("Phone privat")
-    table.add_column("Phone work")
-    table.add_column("Phone secret")
-    table.add_column("Email privat")
-    table.add_column("Email work")
-    table.add_column("Email secret")
-    table.add_column("Whatsup")
-    table.add_column("Telegram")
-    table.add_column("Signal")
-    table.add_column("Hangouts")
+    # table.add_column("Phone privat")
+    # table.add_column("Phone work")
+    # table.add_column("Phone secret")
+    # table.add_column("Email privat")
+    # table.add_column("Email work")
+    # table.add_column("Email secret")
+    # table.add_column("Whatsup")
+    # table.add_column("Telegram")
+    # table.add_column("Signal")
+    # table.add_column("Hangouts")
 
     for element in network_elements:
         table.add_row(str(element.contact.id),
@@ -409,16 +409,17 @@ def print_network_element(network_elements: List[NetworkElement]) -> None:
                       element.contact.surname,
                       str(element.contact.birthdate),
                       element.contact.note,
-                      element.connection.phone_privat,
-                      element.connection.phone_work,
-                      element.connection.phone_secret,
-                      element.connection.email_privat,
-                      element.connection.email_work,
-                      element.connection.email_secret,
-                      element.connection.whatsup,
-                      element.connection.telegram,
-                      element.connection.signal,
-                      element.connection.hangouts)
+                      # element.connection.phone_privat,
+                      # element.connection.phone_work,
+                      # element.connection.phone_secret,
+                      # element.connection.email_privat,
+                      # element.connection.email_work,
+                      # element.connection.email_secret,
+                      # element.connection.whatsup,
+                      # element.connection.telegram,
+                      # element.connection.signal,
+                      # element.connection.hangouts
+                      )
     console = Console()
     console.print(table)
 

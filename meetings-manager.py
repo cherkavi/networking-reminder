@@ -31,7 +31,7 @@ def update_meeting(connection: Connection, meeting: Meeting) -> None:
     """ update meeting  or throw exception """
     if connection is None:
         return False
-    cursor = connection.cursor()
+    cursor = connection.cursor()    
     try:
         cursor.execute("UPDATE meetings SET id_contact=?, date=?, status=?, notes=? WHERE id=?",
                        (meeting.id_contact, meeting.date, meeting.status.value, meeting.notes, meeting.id))
@@ -65,7 +65,7 @@ def main_menu():
             'type': 'list',
             'name': 'main_menu',
             'message': 'Main Menu:',
-            'choices': ['Upcoming Meetings', 'Find person', 'Find All persons without meetings', Separator(), 'Exit']
+            'choices': ['Upcoming Meetings ( till tomorrow )', 'Find person', 'Find All persons without meetings', Separator(), 'Exit']
         }
     ]
     try:
@@ -382,26 +382,14 @@ def find_contacts_without_meetings(connection: Connection) -> List[Contact]:
 
 
 def show_menu(connection: Connection):
-    """
-    TODO: main menu
-          1. find contact
-             1. show next meeting
-             2. create meeting with him/her if no meeting is scheduled
-             3. edit next meeting
-                1. set as done ( with additional note )
-                2. set as cancelled ( with additional note )
-                3. set as callback ( with additional note )
-                4. create new next meeting ( with additional note )
-             4. show last 5 meetings by contact ( with notes )
-    """
     while True:
         ##########################################################
         choice = main_menu()
         if choice == 'Exit':
             break
-        elif choice == 'Upcoming Meetings':
+        elif choice == 'Upcoming Meetings ( till tomorrow )':
             # datetime.now() + timedelta(days=5)
-            meetings: List[(Meeting, Contact)] = find_upcoming_meetings(connection, datetime.now() + timedelta(days=1))
+            meetings: List[(Meeting, Contact)] = find_upcoming_meetings(connection, datetime.now() + timedelta(days=2))
             if meetings is None:
                 continue
             selected_meeting = select_one_meeting_with_contacts(meetings)
@@ -409,8 +397,8 @@ def show_menu(connection: Connection):
                 print_contact(connection, selected_meeting.id_contact)
                 updated_meeting: Meeting = meeting_menu(selected_meeting)
                 if updated_meeting:
-                    update_meeting(connection, selected_meeting)
-                    press_any_key_to_continue(message="saved").ask()
+                    update_meeting(connection, updated_meeting)
+                    press_any_key_to_continue(message="saved...").ask()
                 else:
                     continue
             else:
@@ -439,11 +427,6 @@ def show_menu(connection: Connection):
                 continue
             print_contact(connection, contact.id)
 
-            five_days_later = datetime.now() + timedelta(days=5)
-            meeting = Meeting(contact.id, five_days_later, Status.TODO)
-            new_meeting: Meeting = meeting_menu(meeting)
-            if new_meeting:
-                save_meeting(connection, new_meeting)
             ##########################################################
             while True:
                 contact_choice = person_menu(f"{contact.name} {contact.surname}")
