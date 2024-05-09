@@ -349,7 +349,7 @@ def select_one_meeting_with_contacts(meetings: List[Tuple[Meeting, Contact]]) ->
             'type': 'list',
             'name': 'meeting',
             'message': 'Select a meeting for editing:',
-            'choices': [{"name": f'{meeting.date} - {contact.name} {contact.surname}', "value": meeting.id} for meeting, contact in meetings]
+            'choices': [{"name": f"{str(meeting.date)[:10]:<10} - {meeting.status.name[:10]:>10} - {contact.name} {contact.surname}", "value": meeting.id} for meeting, contact in meetings]
         }
     ]
     try:

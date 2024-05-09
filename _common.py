@@ -90,11 +90,14 @@ class NetworkElement:
 class Status(Enum):
     TODO = 0
     """ init status of the meeting - need to work on it """
+    ASKED = 10
+    """ I've asked the person (pinged) - waiting for answer """
     DONE = 20
     """ meeting is done """
     CANCELLED = 40
     """ meeting is cancelled by some reason, 'note' can have the reason """
-    CALLBACK = 60
+    CALLEDBACK = 60
+    """ person called me back before meeting  """
 
 
 
