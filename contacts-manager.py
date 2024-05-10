@@ -457,6 +457,8 @@ if __name__ == '__main__':
                     continue
                 print(element)
                 element = prompt_network_element(element)
+                if not element:
+                    continue
                 element.contact.id = id
                 update_network_element(connection, element)
                 print(get_network_element(connection, id))
