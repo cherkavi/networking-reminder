@@ -262,7 +262,7 @@ def prompt_network_element(element: NetworkElement = None):
     return NetworkElement(contact, connection)
 
 
-def confirm_delete(element: NetworkElement):
+def confirm_delete(element: NetworkElement) -> bool:
     questions = [
         {
             'type': 'confirm',
@@ -272,10 +272,12 @@ def confirm_delete(element: NetworkElement):
         }
     ]
 
-    answers = prompt(questions)
-    return answers['confirm']
-
-
+    try:
+        answers = unsafe_prompt(questions)
+        return answers['confirm']
+    except KeyboardInterrupt:
+        return False
+    
 class GoogleContact:
     def __init__(self, name, surname, phone1, phone2, phone3, email1, email2, email3, birthdate=None, note=None):
         self.name = name

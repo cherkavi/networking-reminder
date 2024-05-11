@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from sqlite3 import Connection
 from typing import List, Union, Tuple
 
+from pynput import keyboard
+from pynput.keyboard import Key, Controller
 from questionary import prompt, Separator, unsafe_prompt, Style, press_any_key_to_continue
 from rich.console import Console
 from rich.table import Table
@@ -12,7 +14,7 @@ from _common import create_table, create_connection, DB_DEFAULT_PATH, Meeting, g
     Contact, Status
 
 
-def create_meeting(connection: Connection, meeting: Meeting) -> Meeting:
+def db_create_meeting(connection: Connection, meeting: Meeting) -> Meeting:
     """ create meeting and return the same object but with newly created id"""
     if connection is None:
         return False
@@ -27,8 +29,8 @@ def create_meeting(connection: Connection, meeting: Meeting) -> Meeting:
     return meeting
 
 
-def update_meeting(connection: Connection, meeting: Meeting) -> None:
-    """ update meeting  or throw exception """
+def db_update_meeting(connection: Connection, meeting: Meeting) -> None:
+    """ update meeting or throw exception """
     if connection is None:
         return False
     cursor = connection.cursor()    
@@ -40,7 +42,7 @@ def update_meeting(connection: Connection, meeting: Meeting) -> None:
         cursor.close()
 
 
-def init_database(connection: Connection) -> bool:
+def db_init_database(connection: Connection) -> bool:
     """ create tables if not exists """
     if connection is None:
         return False
@@ -202,10 +204,10 @@ def meeting_menu(meeting: Meeting) -> Meeting:
 
 def save_meeting(connection: Connection, new_meeting: Meeting) -> Meeting:
     if new_meeting.id:
-        update_meeting(connection, new_meeting)
+        db_update_meeting(connection, new_meeting)
         return new_meeting
     else:
-        return create_meeting(connection, new_meeting)
+        return db_create_meeting(connection, new_meeting)
 
 
 def get_todo_meeting_by_contact_id(connection: Connection, contact_id: int):
@@ -381,6 +383,27 @@ def find_contacts_without_meetings(connection: Connection) -> List[Contact]:
         cursor.close()
 
 
+def confirm_new_meeting_creation(meeting: Meeting) -> bool:
+    """ ask for new meeting creation, after closing previous one """
+    if meeting.status.value >= Status.DONE.value:
+        questions = [
+            {
+                'type': 'confirm',
+                'name': 'confirm',
+                'message': f"create new meeting  ?",
+                'default': False
+            }
+        ]
+
+        try:
+            answers = unsafe_prompt(questions)
+            return answers['confirm']
+        except KeyboardInterrupt:
+            return False
+    else:
+        return False
+
+
 def show_menu(connection: Connection):
     while True:
         ##########################################################
@@ -397,8 +420,11 @@ def show_menu(connection: Connection):
                 print_contact(connection, selected_meeting.id_contact)
                 updated_meeting: Meeting = meeting_menu(selected_meeting)
                 if updated_meeting:
-                    update_meeting(connection, updated_meeting)
-                    press_any_key_to_continue(message="saved...").ask()
+                    db_update_meeting(connection, updated_meeting)
+                    if confirm_new_meeting_creation(updated_meeting):
+                        create_new_meeting(connection, selected_meeting.id_contact)
+                    else:
+                        press_any_key_to_continue(message="saved...").ask()
                 else:
                     continue
             else:
@@ -411,14 +437,7 @@ def show_menu(connection: Connection):
             contact: Contact = select_one_contact(contacts)
             if contact:
                 print_contact(connection, contact.id)
-                five_days_later = datetime.now() + timedelta(days=5)
-                meeting = Meeting(contact.id, five_days_later, Status.TODO)
-                print("  Create new Meeting: ")
-                new_meeting: Meeting = meeting_menu(meeting)
-                if new_meeting:
-                    save_meeting(connection, new_meeting)
-                else:
-                    continue
+                create_new_meeting(connection, contact.id)
             else:
                 continue
         elif choice == 'Find person':
@@ -438,15 +457,11 @@ def show_menu(connection: Connection):
                     if selected_meeting:
                         updated_meeting: Meeting = meeting_menu(selected_meeting)
                         if updated_meeting:
-                            update_meeting(connection, updated_meeting)
+                            db_update_meeting(connection, updated_meeting)
                         else:
                             continue
                 elif contact_choice == 'Create new meeting':
-                    five_days_later = datetime.now() + timedelta(days=5)
-                    meeting = Meeting(contact.id, five_days_later, Status.TODO)
-                    new_meeting: Meeting = meeting_menu(meeting)
-                    if new_meeting:
-                        save_meeting(connection, new_meeting)
+                    create_new_meeting(connection, contact.id)
                 elif contact_choice == 'Show last 5 meetings':
                     meetings: List[Meeting] = get_meetings_by_contact_id(connection, contact.id, 5)
                     print_list_of_meetings(meetings)
@@ -461,9 +476,17 @@ def show_menu(connection: Connection):
         # "find contact" Handle other choices here
 
 
+def create_new_meeting(connection:Connection, contact_id: int):
+    five_days_later = datetime.now() + timedelta(days=5)
+    meeting = Meeting(contact_id, five_days_later, Status.TODO)
+    new_meeting: Meeting = meeting_menu(meeting)
+    if new_meeting:
+        save_meeting(connection, new_meeting)
+
+
 def escape_listener():
     def on_press(key):
-        if key == keyboard.Key.esc:
+        if key == Key.esc:
             # print('Escape key pressed. Exiting...')
             controller = Controller()
             # Press and release Ctrl+C
@@ -489,6 +512,6 @@ if __name__ == '__main__':
         escape_to_break_converter.start()
 
     with create_connection(database) as connection:
-        if not init_database(connection):
+        if not db_init_database(connection):
             exit(1)
         show_menu(connection)
