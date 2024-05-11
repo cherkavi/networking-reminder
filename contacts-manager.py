@@ -188,7 +188,7 @@ class PhoneValidator(Validator):
                 cursor_position=len(document.text))
 
 
-def prompt_network_element(element: NetworkElement = None):
+def prompt_network_element(element: NetworkElement = None) -> Union[NetworkElement, None]:
     contact_questions = [
         {
             'type': 'input',
@@ -443,9 +443,10 @@ if __name__ == '__main__':
             if mode == 'Create record':
                 print("-------------")
                 element: NetworkElement = prompt_network_element()
-                id = create_network_element(connection, element)
-                print(f" created: {id}")
-                print(get_network_element(connection, id))
+                if element:
+                    id = create_network_element(connection, element)
+                    print(f" created: {id}")
+                    print(get_network_element(connection, id))
 
             if mode == 'Edit record':
                 print("-------------")
