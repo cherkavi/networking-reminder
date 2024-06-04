@@ -412,7 +412,7 @@ def show_menu(connection: Connection):
             break
         elif choice == 'Upcoming Meetings ( till tomorrow )':
             # datetime.now() + timedelta(days=5)
-            meetings: List[(Meeting, Contact)] = find_upcoming_meetings(connection, datetime.now() + timedelta(days=2))
+            meetings: List[(Meeting, Contact)] = find_upcoming_meetings(connection, datetime.now()) #  + timedelta(days=2))
             if meetings is None:
                 continue
             selected_meeting = select_one_meeting_with_contacts(meetings)
