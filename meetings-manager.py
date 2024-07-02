@@ -371,8 +371,9 @@ def find_contacts_without_meetings(connection: Connection) -> List[Contact]:
             """ 
             SELECT c.id, c.name, c.surname, c.birthdate, c.note
             FROM contacts c            
-            WHERE c.id not in (SELECT id_contact FROM meetings where id_contact is not null) and c.deleted = 0
-            """)
+            WHERE c.id not in (SELECT id_contact FROM meetings where id_contact is not null and date >= ?) and c.deleted = 0
+            """,
+            (datetime.now(),))
         return [Contact(id=row[0],
                         name=row[1],
                         surname=row[2],
