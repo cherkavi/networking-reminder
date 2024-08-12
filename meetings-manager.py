@@ -214,8 +214,8 @@ def get_todo_meeting_by_contact_id(connection: Connection, contact_id: int):
     cursor = connection.cursor()
     try:
         cursor.execute(
-            "SELECT id_contact, date, status, notes, id FROM meetings WHERE id_contact=? AND status=?  order by DATE ASC",
-            (contact_id, Status.TODO.value))
+            "SELECT id_contact, date, status, notes, id FROM meetings WHERE id_contact=? AND status in (?, ?)  order by DATE ASC",
+            (contact_id, Status.TODO.value, Status.ASKED.value))
         return [Meeting(id_contact=row[0],
                         date=datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S'),
                         status=Status(row[2]),
