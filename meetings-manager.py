@@ -1,6 +1,7 @@
 import sys
 import threading
 from datetime import datetime, timedelta
+import sqlite3
 from sqlite3 import Connection
 from typing import List, Union, Tuple
 
@@ -9,6 +10,11 @@ from pynput.keyboard import Key, Controller
 from questionary import prompt, Separator, unsafe_prompt, Style, press_any_key_to_continue
 from rich.console import Console
 from rich.table import Table
+
+
+def adapt_datetime(dt):
+    return dt.strftime('%Y-%m-%d %H:%M:%S')
+sqlite3.register_adapter(datetime, adapt_datetime)
 
 from _common import create_table, create_connection, DB_DEFAULT_PATH, Meeting, get_contacts_by_name_and_surname, \
     Contact, Status
