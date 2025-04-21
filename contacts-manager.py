@@ -188,7 +188,37 @@ class PhoneValidator(Validator):
                 cursor_position=len(document.text))
 
 
+def check_date_format_or_none(date: str) -> bool:
+    if date is None or date.strip()=="":
+        return True
+    # datetime.strptime(x, '%Y-%m-%d') # or 'Invalid date format, should be YYYY-MM-DD'
+    try:
+        datetime.strptime(date, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
+
+
 def prompt_network_element(element: NetworkElement = None) -> Union[NetworkElement, None]:
+    if element==None:
+        # new element
+        birthday = {
+            'type': 'input',
+            'name': 'birthdate',
+            'message': 'Enter the contact\'s birthdate (YYYY-MM-DD):',
+            'validate': lambda x: check_date_format_or_none(x),
+            'default': ''
+        }
+    else:
+        # update element 
+        birthday = {
+            'type': 'input',
+            'name': 'birthdate',
+            'message': 'Enter the contact\'s birthdate (YYYY-MM-DD):',
+            'validate': DateValidator,
+            'default': element.contact.birthdate if element and element.contact else ''
+        }
+
     contact_questions = [
         {
             'type': 'input',
@@ -202,13 +232,7 @@ def prompt_network_element(element: NetworkElement = None) -> Union[NetworkEleme
             'message': 'Enter the contact\'s surname:',
             'default': element.contact.surname if element else ''
         },
-        {
-            'type': 'input',
-            'name': 'birthdate',
-            'message': 'Enter the contact\'s birthdate (YYYY-MM-DD):',
-            'validate': DateValidator,
-            'default': element.contact.birthdate if element else ''
-        },
+        birthday,
         {
             'type': 'input',
             'name': 'note',
