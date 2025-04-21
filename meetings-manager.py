@@ -175,13 +175,6 @@ def check_date_format(date: str) -> bool:
 def meeting_menu(meeting: Meeting) -> Meeting:
     questions = [
         {
-            'type': 'input',
-            'name': 'date',
-            'message': 'Enter date (YYYY-MM-DD):',
-            'default': meeting.date.strftime('%Y-%m-%d'),
-            'validate': lambda x: check_date_format(x)
-        },
-        {
             'type': 'list',
             'name': 'status',
             'message': 'Select status:',
@@ -195,6 +188,13 @@ def meeting_menu(meeting: Meeting) -> Meeting:
             'message': 'Enter notes:',
             # DO NOT return None as default
             'default': meeting.notes if meeting and meeting.notes else ""
+        },
+        {
+            'type': 'input',
+            'name': 'date',
+            'message': 'Enter date (YYYY-MM-DD):',
+            'default': meeting.date.strftime('%Y-%m-%d'),
+            'validate': lambda x: check_date_format(x)
         }
     ]
     try:
