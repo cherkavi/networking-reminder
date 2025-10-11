@@ -75,6 +75,12 @@ if you will select the meeting - "edit meeting" will be activated
 #### find contacts without upcoming meeting
 select menu 
 
+### Birthday reminder 
+```sh
+PATH_TO_DB=./contacts-meetings.db
+python3 birthday-reminder.py $PATH_TO_DB    
+```
+
 ## Technical description 
 Two tier application ( DB + Python console app).
 
@@ -112,9 +118,14 @@ PATH_TO_DB=./contacts-meetings.db
 sqlite3 $PATH_TO_DB
 ```
 ```sql
+.tables
+
 select * from contacts limit 5;
 select * from connections limit 5 ;
-
 select * from meetings limit 5;
-```
 
+
+select count(*) from contacts;
+select count(*) from connections;
+select count(*) from meetings;
+```
