@@ -193,7 +193,12 @@ def meeting_menu(meeting: Meeting) -> Meeting:
             'type': 'input',
             'name': 'date',
             'message': 'Enter date (YYYY-MM-DD):',
-            'default': meeting.date.strftime('%Y-%m-%d'),
+            # 'default': meeting.date.strftime('%Y-%m-%d'),
+            'default': lambda answers: (
+                    datetime.now().strftime('%Y-%m-%d') 
+                      if answers.get('status') == Status.ASKED.name 
+                      else meeting.date.strftime('%Y-%m-%d')
+            ),
             'validate': lambda x: check_date_format(x)
         }
     ]
