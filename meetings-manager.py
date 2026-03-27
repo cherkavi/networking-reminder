@@ -513,8 +513,13 @@ def escape_listener():
 
 
 if __name__ == '__main__':
+    print_only:bool = False
     if len(sys.argv) > 1:
         database = sys.argv[1]
+        # check input parameters 
+        for each_parameter in sys.argv[1:]:
+            if each_parameter.lower() == "print_only":
+                print_only=True
     else:
         database = DB_DEFAULT_PATH
 
@@ -526,4 +531,10 @@ if __name__ == '__main__':
     with create_connection(database) as connection:
         if not db_init_database(connection):
             exit(1)
-        show_menu(connection)
+        if print_only:
+            elements: List[Tuple[Meeting, Contact]] = find_upcoming_meetings(connection, datetime.now()) #  + timedelta(days=2))
+            if elements is not None:
+                for element in elements:
+                    print(f"{str(element[0].date)[0:11]}  {element[0].status.name} -  {element[1].name}  {element[1].surname}")
+        else:
+            show_menu(connection)
