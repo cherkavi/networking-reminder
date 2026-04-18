@@ -2,6 +2,7 @@ import sys
 import datetime
 from _common import create_table, create_connection, Connection, NetworkElement, Contact, DB_DEFAULT_PATH, get_contacts_by_name_and_surname
 from sqlite3 import Connection as DBConnection
+from typing import List
 
 def get_recent_and_upcoming_birthdays(connection: DBConnection, days_range=5):    
     """
@@ -45,6 +46,10 @@ if __name__ == '__main__':
     default_amount_of_days:int = 5
     if len(sys.argv) > 2:
         default_amount_of_days = int(sys.argv[2])
+
+    edit: List[str] = [each_argument for each_argument in sys.argv[1:] if each_argument=='mark_complete']
+    if len(edit)>0:
+        print("need to complete")
 
     db_connection: DBConnection
     with create_connection(database_path) as db_connection:
