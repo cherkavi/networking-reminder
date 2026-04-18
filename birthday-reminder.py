@@ -1,8 +1,12 @@
 import sys
 import datetime
 from _common import create_table, create_connection, Connection, NetworkElement, Contact, DB_DEFAULT_PATH, get_contacts_by_name_and_surname
+from sqlite3 import Connection as DBConnection
 
-def get_recent_and_upcoming_birthdays(connection: Connection, days_range=5):    
+def get_recent_and_upcoming_birthdays(connection: DBConnection, days_range=5):    
+    """
+    get from DBConnection.contacts table all the birthdays in the range of +-days_range
+    """
     today = datetime.date.today()
     results = []
 
@@ -33,13 +37,18 @@ def get_recent_and_upcoming_birthdays(connection: Connection, days_range=5):
 
 # Example usage:
 if __name__ == '__main__':
+    
+    database_path = DB_DEFAULT_PATH
     if len(sys.argv) > 1:
-        database = sys.argv[1]
-    else:
-        database = DB_DEFAULT_PATH
+        database_path: str = sys.argv[1]
 
-    with create_connection(database) as connection:
-        birthdays = get_recent_and_upcoming_birthdays(connection, 5)
+    default_amount_of_days:int = 5
+    if len(sys.argv) > 2:
+        default_amount_of_days = int(sys.argv[2])
+
+    db_connection: DBConnection
+    with create_connection(database_path) as db_connection:
+        birthdays = get_recent_and_upcoming_birthdays(db_connection, default_amount_of_days)
         for entry in birthdays:
             contact = entry["contact"]
             days = entry["days_from_today"]

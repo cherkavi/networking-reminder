@@ -1,31 +1,36 @@
 import sqlite3
-from sqlite3 import Connection, Error
+from sqlite3 import Connection as DBConnection, Error, Cursor
 from datetime import datetime
 from enum import Enum
-from typing import List
+from typing import List, Tuple
+import sys
+
+from narwhals import Object
 
 
 DB_DEFAULT_PATH = "contacts-meetings.db"
 """ default path to database file """
 
 
-def create_table(conn: Connection, create_table_sql):
+def create_table(conn: DBConnection, create_table_sql):
+    cursor:Cursor = None
     try:
-        cursor = conn.cursor()
+        cursor: Cursor = conn.cursor()
         cursor.execute(create_table_sql)
     except Error as e:
         print(e)
     finally:
-        cursor.close()
+        if cursor is not None: 
+            cursor.close()
 
 
-def create_connection(db_file: str = DB_DEFAULT_PATH):
-    conn = None;
+def create_connection(db_file: str = DB_DEFAULT_PATH) -> DBConnection :
     try:
-        conn = sqlite3.connect(db_file)  # creates a file-based database
+        conn: DBConnection = sqlite3.connect(db_file)  # creates a file-based database
         return conn
     except Error as e:
-        print(e)
+        print(e, file = sys.stderr)
+        return None
 
 
 class Contact:
@@ -52,7 +57,7 @@ class Contact:
         return None
 
 
-class Connection:
+class Connection(object):
     def __init__(self, id, id_contact, phone_privat, phone_work, phone_secret, email_privat, email_work, email_secret,
                  whatsup, telegram, signal, hangouts, deleted=False):
         self.id = id
@@ -122,7 +127,7 @@ class Meeting:
         return None
 
 
-def get_contacts_by_name_and_surname(connection: Connection, name=None, surname=None) -> List[Contact]:
+def get_contacts_by_name_and_surname(connection: DBConnection, name=None, surname=None) -> List[Contact]:
     """
     get contacts by name and surname
     :param connection:
