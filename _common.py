@@ -5,9 +5,6 @@ from enum import Enum
 from typing import List, Tuple
 import sys
 
-from narwhals import Object
-
-
 DB_DEFAULT_PATH = "contacts-meetings.db"
 """ default path to database file """
 
