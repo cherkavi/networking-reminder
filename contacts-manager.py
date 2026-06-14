@@ -11,7 +11,7 @@ from rich import print as print_rich
 from rich.console import Console
 from rich.table import Table
 
-from _common import create_table, create_connection, Connection, NetworkElement, Contact, DB_DEFAULT_PATH, get_contacts_by_name_and_surname
+from _common import create_table, create_connection, Connection, NetworkElement, Contact, DB_DEFAULT_PATH, get_contacts_by_name_and_surname, get_contacts_without_birthdays
 
 
 def datetime_to_string(dt: datetime) -> str:
@@ -366,6 +366,7 @@ def parse_google_contacts(file_path: str) -> List[GoogleContact]:
 
 main_menu: List[str] = [
     'Find record',
+    'Find record without birthdays',
     'Create record',
     'Edit record',
     'Import Google contacts',
@@ -516,6 +517,14 @@ if __name__ == '__main__':
                     print_rich(f"[bold yellow]Warning: [/bold yellow] element ({name} {surname}) was not found.")
                 else:
                     # print_contacts(contacts)
+                    print_network_element([get_network_element(connection, contact.id) for contact in contacts])
+
+            if mode == 'Find record without birthdays':
+                print("-------------")
+                contacts = get_contacts_without_birthdays(connection)
+                if not contacts:
+                    print_rich("[bold green]Success: [/bold green] All contacts have birthdays.")
+                else:
                     print_network_element([get_network_element(connection, contact.id) for contact in contacts])
 
             if mode == 'Import Google contacts':

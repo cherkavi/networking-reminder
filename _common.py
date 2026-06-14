@@ -157,6 +157,22 @@ def get_contacts_by_name_and_surname(connection: DBConnection, name=None, surnam
         cursor.close()
 
 
+def get_contacts_without_birthdays(connection: Connection) -> List[Contact]:
+    try:
+        cur = connection.cursor()
+        cur.execute("SELECT * FROM contacts WHERE (birthdate IS NULL OR birthdate = '') AND deleted = 0")
+
+        contacts: List[Contact] = []
+        for row in cur:
+            contact = Contact(row[0], row[1], row[2], row[3], row[4])
+            contacts.append(contact)
+
+        return contacts
+    finally:
+        if cur:
+            cur.close()
+
+
 class GoBack(Exception):
     pass
 

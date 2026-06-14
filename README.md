@@ -129,3 +129,6 @@ select count(*) from contacts;
 select count(*) from connections;
 select count(*) from meetings;
 ```
+
+## TODO
+* mark birthday as done/ask/todo, do not show again
